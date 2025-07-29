@@ -5,7 +5,7 @@ DEBUG = 1
 if DEBUG == 0:
     p = process("./pwn106")
 else:
-    p = remote("10.10.163.188", 9006)
+    p = remote("", 9006)
     
 p.recvuntil(b"Enter your THM username to participate in the giveaway:")
 

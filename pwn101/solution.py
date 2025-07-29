@@ -1,11 +1,11 @@
 from pwn import *
 
-DEBUG = 1
+DEBUG = 0
 if DEBUG == 0 :
     p = process("./pwn101")
 
 else:
-    p = remote("10.10.91.44", 9001)
+    p = remote("", 9001)
 
 
 p.recvline(b"Type the required ingredients to make briyani:")      

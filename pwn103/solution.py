@@ -1,12 +1,12 @@
 from pwn import *
 
-DEBUG = 1
+DEBUG = 0
 
 if DEBUG == 0:
     p = process("./pwn103")
 
 else:
-    p = remote("10.10.242.11", 9003)
+    p = remote("", 9003)
 
 elf = ELF('./pwn103')
 ret_gadget = next(elf.search(asm('ret')))

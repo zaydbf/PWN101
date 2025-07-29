@@ -3,11 +3,11 @@ from pwn import *
 e= ELF('./pwn107')
 context.binary = './pwn107'
 
-DEBUG = 1
+DEBUG = 0
 if DEBUG == 0:
     p = process("./pwn107")
 else : 
-    p = remote("10.10.173.45", 9007)    
+    p = remote("", 9007)    
 
 # used to get the i where we get a good leak (here it was %17$p)
 # NOTTEE !! on remote server it was %19$p for some reason

@@ -1,10 +1,10 @@
 from pwn import *
 
-DEBUG = 1
+DEBUG = 0
 if DEBUG == 0:
     p = process("./pwn102")
 else:
-    p = remote("10.10.242.11", 9002 )
+    p = remote("", 9002 )
 
 p.recvline(b"Am I right?")
 local_c =  0x00c0ff33000

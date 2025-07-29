@@ -6,7 +6,7 @@ DEBUG = 0
 if DEBUG == 0 : 
     p = process("./pwn104")
 else:
-    p = remote("10.10.75.155", 9004)
+    p = remote("", 9004)
 
 p.recvuntil(b"I'm waiting for you at")
 addr=p.recvline().strip().decode()

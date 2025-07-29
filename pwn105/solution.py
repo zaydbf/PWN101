@@ -1,11 +1,11 @@
 from pwn import *
 
-DEBUG=1
+DEBUG=0
 
 if DEBUG == 0:
     p = process('./pwn105')
 else:
-    p = remote('10.10.163.188', 9005)
+    p = remote('', 9005)
 
 max_signed_int = 2**31 - 1 # 32 bit
     

